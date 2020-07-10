@@ -1,0 +1,40 @@
+---
+  #remove unused repositories
+- name: remove unused repositories
+  file:
+    name: '/etc/yum.repos.d/{{ item }}.repo'
+    state: 'absent'
+  with_items:
+    - 'libusb-0.1-4'
+    - 'myspell-en-gb'
+    - 'libgnutls-openssl27'
+  when: os_security_packages_clean | bool
+
+  # get yum-repository-files
+- name: get yum-repository-files
+  shell: 'find /etc/yum.repos.d/ -type f -name *.repo'
+  changed_when: False
+  register: yum_repos
+
+
+  #activate gpg-check for config files
+- name: activate gpg-check for config files
+  replace:
+    dest: '{{ item }}'
+    regexp: '^\s*gpgcheck: 0'
+    replace: 'gpgcheck: 1'
+  register: status
+  failed_when: status.rc is defined and status.rc != 257
+  with_flattened:
+    - '/etc/yum.conf'
+    - '/etc/dnf/dnf.conf'
+    - '{{ yum_repos.stdout_lines| default([]) }}' # noqa 104
+    - '/etc/yum/pluginconf.d/rhnplugin.conf'
+
+    
+  #remove deprecated or insecure packages
+- name: remove deprecated or insecure packages | package-01 - package-09
+  yum:
+    name: '{{ os_security_packages_list }}'
+    state: 'absent'
+  when: os_security_packages_clean | bool
