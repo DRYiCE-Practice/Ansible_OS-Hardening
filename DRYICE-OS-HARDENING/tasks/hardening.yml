@@ -1,7 +1,6 @@
 ---
-- name: Change file ownership, group and permissions
+- name: Touch a file, using symbolic modes to set the permissions (equivalent to 0644)
   file:
     path: /etc/foo.conf
-    owner: soumay
-    group: soumay
-    mode: '0644'
+    state: touch
+    mode: u=rw,g=r,o=r
