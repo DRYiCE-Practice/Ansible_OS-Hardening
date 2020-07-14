@@ -1,33 +1,7 @@
 ---
-  # Set OS family dependent variables
-- name: Set OS family dependent variables
-  include_vars: '{{ ansible_facts.os_family }}.yml'
-  tags: always
-
-  # Set OS dependent variables
-- name: Set OS dependent variables
-  include_vars: '{{ item }}'
-  with_first_found:
-    - files:
-      - '{{ ansible_facts.distribution }}-{{ ansible_facts.distribution_major_version }}.yml'
-      - '{{ ansible_facts.distribution }}.yml'
-      - '{{ ansible_facts.os_family }}-{{ ansible_facts.distribution_major_version }}.yml'
-      skip: true
-  tags: always
-
-- import_tasks: yum.yml
-  when: ansible_facts.os_family == 'RedHat'
-  tags: yum
-
-- import_tasks: auditd.yml
-  tags: auditd
-  when: os_auditd_enabled | bool
-
-- import_tasks: pam.yml
-  tags: pam
-
-- import_tasks: pamlimits.yml
-  tags: pam-limits
-
-- import_tasks: minimize_access.yml
-  tags: minimize_access
+- name: Change file ownership, group and permissions
+  file:
+    path: /etc/foo.conf
+    owner: soumay
+    group: soumay
+    mode: '0644'
